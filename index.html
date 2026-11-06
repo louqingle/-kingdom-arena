@@ -44,7 +44,7 @@ function makeHero(team,role,x,z,isPlayer=false){const g=new THREE.Group();const 
 const heroes=[];const player=makeHero('blue','战士',-24,2,true);heroes.push(player);
 const roles=['坦克','法师','射手','打野'];for(let i=0;i<4;i++){heroes.push(makeHero('blue',roles[i],-26,[-5,-1,5,9][i]));heroes.push(makeHero('red',roles[i],25,[-9,-3,3,9][i]))}
 heroes.push(makeHero('red','战士',24,0));
-const minions=[];function spawnMinions(){for(const team of ['blue','red'])for(let i=0;i<3;i++){const m=makeHero(team,'兵线',team==='blue'?-28:28,(i-1)*1.2);m.hp=m.max=220;m.atk=22;m.speed=2.1;m.range=2.7;m.isMinion=true;minions.push(m)}}spawnMinions();
+const minions=[];function spawnMinions(){for(const team of ['blue','red'])for(const z of [-16,0,16]){const m=makeHero(team,'兵线',team==='blue'?-28:28,z);m.hp=m.max=220;m.atk=22;m.speed=2.1;m.range=2.7;m.isMinion=true;minions.push(m)}}spawnMinions();
 let started=false,ended=false,elapsed=0,kills=0,gold=300,mana=100,skill1=0,skill2=0,recall=0,joy={x:0,y:0},attackHeld=false;
 const $=s=>document.querySelector(s);function updateHud(){$('#hp').style.width=Math.max(0,player.hp/player.max*100)+'%';$('#mana').style.width=mana+'%';$('#kills').textContent=kills;$('#gold').textContent=gold;$('#timer').textContent=String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(Math.floor(elapsed%60)).padStart(2,'0')}
 function closestEnemy(unit,range=Infinity){let best=null,d=range;for(const e of [...heroes,...minions])if(e.team!==unit.team&&e.alive){const dist=e.g.position.distanceTo(unit.g.position);if(dist<d){d=dist;best=e}}return best}
