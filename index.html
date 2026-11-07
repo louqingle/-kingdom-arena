@@ -47,7 +47,7 @@ const units=[player];
 for(let i=0;i<4;i++){units.push({x:-25,z:[-12,-4,5,13][i],team:0,hp:850,max:850,speed:3.2,cd:0,role:['盾','法','射','刺'][i]});units.push({x:24,z:[-13,-5,4,12][i],team:1,hp:850,max:850,speed:3.2,cd:0,role:['盾','法','射','刺'][i]})}
 units.push({x:24,z:0,team:1,hp:850,max:850,speed:3.2,cd:0,role:'战'});
 const minions=[];
-function wave(){for(let t=0;t<2;t++)for(const z of [-16,0,16])minions.push({x:t?-28:-28,z,team:t,hp:220,max:220,speed:2.1,cd:0,minion:true})}
+function wave(){for(let t=0;t<2;t++)for(const z of [-16,0,16])minions.push({x:t?28:-28,z,team:t,hp:220,max:220,speed:2.1,cd:0,minion:true})}
 wave();
 const towers=[];for(const z of [-18,0,18]){towers.push({x:-19,z,team:0,hp:1000,max:1000},{x:19,z,team:1,hp:1000,max:1000})}
 let crystal=2400,skillA=0,skillB=0,recall=0,joy={x:0,y:0},lastWave=0;
