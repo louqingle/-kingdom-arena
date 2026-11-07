@@ -17,6 +17,23 @@
 <div class="overlay hidden" id="end"><div class="card"><div class="logo">MATCH OVER</div><div class="result" id="result">胜利</div><p id="endText">战斗结束</p><button class="start" id="again">再来一局</button></div></div>
 <div class="rotate" id="rotate">请将手机横过来<br><small>横屏体验更佳</small></div>
 </div>
+<script>
+(function(){
+ function enter(e){
+  if(e){e.preventDefault();e.stopPropagation();}
+  window.__gameStarted=true;
+  var intro=document.getElementById('intro');
+  if(intro){intro.hidden=true;intro.style.display='none';intro.style.pointerEvents='none';}
+  var hint=document.getElementById('hint');
+  if(hint)hint.textContent='正在进入战场…';
+ }
+ document.addEventListener('click',function(e){if(e.target&&e.target.closest&&e.target.closest('#start'))enter(e)},true);
+ document.addEventListener('touchend',function(e){if(e.target&&e.target.closest&&e.target.closest('#start'))enter(e)},true);
+ document.addEventListener('pointerup',function(e){if(e.target&&e.target.closest&&e.target.closest('#start'))enter(e)},true);
+ window.addEventListener('error',function(){var h=document.getElementById('hint');if(h)h.textContent='游戏加载出错，请刷新页面';});
+ window.addEventListener('unhandledrejection',function(){var h=document.getElementById('hint');if(h)h.textContent='3D引擎加载失败，请检查网络后刷新';});
+})();
+</script>
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 const root=document.querySelector('#game');
@@ -66,7 +83,7 @@ function castSkill(n){if(!started||ended||!player.alive)return;if(n===1&&skill1<
 function setEnd(win){ended=true;$('#end').classList.remove('hidden');$('#result').textContent=win?'胜利！':'失败';$('#endText').textContent='击败 '+kills+' 名敌方英雄 · 战斗 '+Math.floor(elapsed)+' 秒'}
 function towerUpdate(dt){for(const t of towers){if(t.hp<=0)continue;t.cool-=dt;if(t.cool<=0){let target=[...heroes,...minions].filter(h=>h.team!==t.team&&h.alive&&h.g.position.distanceTo(t.group.position)<t.range).sort((a,b)=>a.g.position.distanceTo(t.group.position)-b.g.position.distanceTo(t.group.position))[0];if(target){t.cool=1.2;damage(target,90)}}}}
 function unitAI(u,dt){if(!u.alive)return;u.cool=Math.max(0,u.cool-dt);const enemy=closestEnemy(u,u.range+1);if(enemy){if(u.cool<=0)attack(u);if(!u.isPlayer&&!u.isMinion){const d=u.g.position.distanceTo(enemy.g.position);if(d>u.range*.8){const v=enemy.g.position.clone().sub(u.g.position).setY(0).normalize();u.g.position.add(v.multiplyScalar(u.speed*dt*.55))}}}else if(!u.isPlayer){const destX=u.team==='blue'?20:-20;const dx=destX-u.g.position.x;u.g.position.x+=Math.sign(dx)*u.speed*dt*.45;u.g.position.z+=(u.baseZ-u.g.position.z)*dt*.2}}
-const clock=new THREE.Clock();function loop(){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),.04);if((started||window.__gameStarted)&&!ended){started=true;$('#intro').style.display='none';elapsed+=dt;skill1=Math.max(0,skill1-dt);skill2=Math.max(0,skill2-dt);mana=Math.min(100,mana+dt*2.5);player.cool=Math.max(0,player.cool-dt);if(player.alive){player.g.position.x+=joy.x*player.speed*dt;player.g.position.z+=joy.y*player.speed*dt;player.g.position.x=THREE.MathUtils.clamp(player.g.position.x,-33,33);player.g.position.z=THREE.MathUtils.clamp(player.g.position.z,-23,23);if(attackHeld)attack(player);if(player.g.position.x>28&&towers.filter(t=>t.team==='red'&&t.hp>0).length===0&&redCrystalHp<=0){setEnd(true)}}for(const h of heroes)if(!h.isPlayer)unitAI(h,dt);for(const m of minions)unitAI(m,dt);towerUpdate(dt);if(Math.floor(elapsed)%18===0&&Math.floor(elapsed)!==loop.lastSpawn){loop.lastSpawn=Math.floor(elapsed);spawnMinions()}if(redBase.position.x<0)setEnd(true);updateHud()}const target=player.g.position;camera.position.lerp(new THREE.Vector3(target.x,target.y+24,target.z+27),.04);camera.lookAt(target.x,0,target.z);blueBase.rotation.y+=dt*.35;redBase.rotation.y-=dt*.35;renderer.render(scene,camera)}loop();
+const clock=new THREE.Clock();function loop(){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),.04);if((started||window.__gameStarted)&&!ended){started=true;$('#intro').style.display='none';$('#hint').textContent='摧毁敌方水晶，守护己方基地';elapsed+=dt;skill1=Math.max(0,skill1-dt);skill2=Math.max(0,skill2-dt);mana=Math.min(100,mana+dt*2.5);player.cool=Math.max(0,player.cool-dt);if(player.alive){player.g.position.x+=joy.x*player.speed*dt;player.g.position.z+=joy.y*player.speed*dt;player.g.position.x=THREE.MathUtils.clamp(player.g.position.x,-33,33);player.g.position.z=THREE.MathUtils.clamp(player.g.position.z,-23,23);if(attackHeld)attack(player);if(player.g.position.x>28&&towers.filter(t=>t.team==='red'&&t.hp>0).length===0&&redCrystalHp<=0){setEnd(true)}}for(const h of heroes)if(!h.isPlayer)unitAI(h,dt);for(const m of minions)unitAI(m,dt);towerUpdate(dt);if(Math.floor(elapsed)%18===0&&Math.floor(elapsed)!==loop.lastSpawn){loop.lastSpawn=Math.floor(elapsed);spawnMinions()}if(redBase.position.x<0)setEnd(true);updateHud()}const target=player.g.position;camera.position.lerp(new THREE.Vector3(target.x,target.y+24,target.z+27),.04);camera.lookAt(target.x,0,target.z);blueBase.rotation.y+=dt*.35;redBase.rotation.y-=dt*.35;renderer.render(scene,camera)}loop();
 const joyEl=$('#joy'),stick=$('#stick');let joyId=null;function joyMove(e){const r=joyEl.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy,len=Math.hypot(dx,dy),max=39;if(len>max){dx=dx/len*max;dy=dy/len*max}joy.x=dx/max;joy.y=dy/max;stick.style.left='calc(50% + '+dx+'px)';stick.style.top='calc(50% + '+dy+'px)'}
 joyEl.addEventListener('pointerdown',e=>{joyId=e.pointerId;joyEl.setPointerCapture(joyId);joyMove(e)});joyEl.addEventListener('pointermove',e=>{if(e.pointerId===joyId)joyMove(e)});function joyEnd(e){if(e.pointerId===joyId){joyId=null;joy.x=joy.y=0;stick.style.left='50%';stick.style.top='50%'}}joyEl.addEventListener('pointerup',joyEnd);joyEl.addEventListener('pointercancel',joyEnd);
 $('#attack').addEventListener('pointerdown',e=>{attackHeld=true;attack(player)});['pointerup','pointercancel','pointerleave'].forEach(ev=>$('#attack').addEventListener(ev,()=>attackHeld=false));$('#skill1').addEventListener('click',()=>castSkill(1));$('#skill2').addEventListener('click',()=>castSkill(2));$('#recall').addEventListener('click',()=>{if(!started||recall>0)return;recall=3;$('#hint').textContent='回城引导中…';setTimeout(()=>{if(started&&!ended){player.g.position.set(-25,0,0);player.hp=player.max;mana=100;$('#hint').textContent='摧毁敌方水晶，守护己方基地'}recall=0},3000)});
